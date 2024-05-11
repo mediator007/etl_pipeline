@@ -6,6 +6,7 @@ from airflow.operators.python import PythonOperator
 
 from settings import Settings
 from lib.tasks.get_universities import get_universities
+from lib.tasks.transform_universities import transform_universities
 from lib.tasks import common
 
 settings = Settings()
@@ -42,7 +43,13 @@ with DAG(
     get_data = PythonOperator(
         task_id='get_data',
         python_callable=get_universities,
-        show_return_value_in_logs=True
+        show_return_value_in_logs=False
     )
 
-    start_task >> get_data >> stop_task
+    transform_data = PythonOperator(
+        task_id='transform_data',
+        python_callable=transform_universities,
+        show_return_value_in_logs=False
+    )
+
+    start_task >> get_data >> transform_data >> stop_task
