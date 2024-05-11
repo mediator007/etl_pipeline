@@ -11,4 +11,5 @@ class Types(StrEnum):
 
 class University(BaseModel):
     name: str
+    country: str
     type: Optional[Types] = None
