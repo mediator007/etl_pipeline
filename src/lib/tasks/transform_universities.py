@@ -27,7 +27,7 @@ def transform_universities(**kwargs) -> list[University]:
     return transformed_data
 
 
-def _validate_university_type(university: University):
+def _validate_university_type(university: University) -> None:
     for type in Types:
         if type.value in university.name:
             university.type = type.value
