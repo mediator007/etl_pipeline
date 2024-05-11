@@ -1,0 +1,32 @@
+services:
+  
+  db:
+    image: postgres
+    restart: always
+    environment:
+      POSTGRES_USER: user
+      POSTGRES_PASSWORD: password
+      POSTGRES_DB: universities
+    volumes:
+      - ./db_data:/var/lib/postgresql/data
+  
+  universities:
+    container_name: universities
+    build:
+      context: ./
+      dockerfile: universities.Dockerfile
+    image: universities
+    ports:
+      - "80:80"
+  
+  etl:
+    container_name: etl
+    build:
+        context: ./
+        dockerfile: Dockerfile
+    depends_on:
+      - db
+      - universities
+    volumes:
+      - ./src:/opt/airflow/dags/
+    image: etl
