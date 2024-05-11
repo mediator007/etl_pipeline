@@ -1,5 +1,4 @@
-import requests as r
-from airflow.decorators import task
+import requests
 
 from utils.logger import get_logger
 
@@ -7,11 +6,7 @@ from utils.logger import get_logger
 log = get_logger()
 
 
-UNIVERSITIES_URL = "http://universities/search"
-
-
-@task
 def get_universities():
-    response = r.get(UNIVERSITIES_URL)
-    log.info(f"Universities Quantity: {len(response.json())}")
-    return response.json()
+    UNIVERSITIES_URL = "http://universities/search"
+    response = requests.get(UNIVERSITIES_URL)
+    log.info(f"Universities quantity {len(response.json())}")

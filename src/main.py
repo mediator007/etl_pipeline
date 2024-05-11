@@ -1,50 +1,48 @@
 from datetime import datetime, timedelta
 
 from airflow import DAG
-from airflow.operators.bash import BashOperator
 from airflow.operators.python import PythonOperator
 
-from utils.logger import get_logger
 
+from settings import Settings
+from lib.tasks.get_universities import get_universities
+from lib.tasks import common
 
-log = get_logger()
-
-
-def my_print():
-    log.critical("-----------------Q-----------------")
-    return "-----------------Q-----------------"
+settings = Settings()
 
 
 default_args = {
-    'owner': 'romank',
     'start_date': datetime.now(),
     'depends_on_past': False,
     'wait_for_downstream': False,
     'retries': 1,
-    'retry_delay': timedelta(seconds=10),  # Retry every 10 seconds if failed
+    'retry_delay': timedelta(seconds=10),
 }
 
 with DAG(
-    'mydag',
+    settings.universities_etl_pipeline_name,
     default_args=default_args,
     schedule_interval=timedelta(seconds=10),
     catchup=False,
     dagrun_timeout=timedelta(seconds=10)
 ) as dag:
 
-    t1 = BashOperator(
-        task_id='echo_hi',
-        bash_command='echo "Hello"',
-    )
-
-    t2 = BashOperator(
-        task_id='print_date',
-        bash_command='date',
-    )
-    t3 = PythonOperator(
-        task_id='print_task',
-        python_callable=my_print,
+    start_task = PythonOperator(
+        task_id='start_task',
+        python_callable=common.start,
         show_return_value_in_logs=True
     )
 
-    t3 >> t2 >> t1
+    stop_task = PythonOperator(
+        task_id='stop_task',
+        python_callable=common.stop,
+        show_return_value_in_logs=True
+    )
+
+    get_data = PythonOperator(
+        task_id='get_data',
+        python_callable=get_universities,
+        show_return_value_in_logs=True
+    )
+
+    start_task >> get_data >> stop_task

@@ -1,8 +1,16 @@
 FROM apache/airflow
 
-USER root
+USER airflow
+
+WORKDIR /opt/airflow
+
+COPY ./requirements.txt ./
+
+RUN pip install -r requirements.txt
 
 COPY ./src /opt/airflow/dags/
+
+USER root
 
 ENV AIRFLOW__WEBSERVER__AUTHENTICATE=True
 ENV AIRFLOW__WEBSERVER__AUTH_BACKEND=airflow.contrib.auth.backends.password_auth
